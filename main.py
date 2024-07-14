@@ -3,11 +3,12 @@ from gtts import gTTS
 import os
 from moviepy.editor import VideoFileClip, AudioFileClip, CompositeVideoClip, TextClip
 from moviepy.video.tools.subtitles import SubtitlesClip
+import random
 
-def generate_narrative(prompt):
+def generate_narrative(prompt, seed):
     # Set up the GPT-2 pipeline
     generator = pipeline('text-generation', model='gpt2')
-    set_seed(42)
+    set_seed(seed)
 
     # Generate text
     generated = generator(prompt, max_length=150, num_return_sequences=1)
@@ -70,19 +71,20 @@ def process_videos_in_directory(directory_path, prompt):
     # Get all video files in the directory
     video_files = [f for f in os.listdir(directory_path) if f.endswith(('.mp4', '.mov', '.avi'))]
 
-    # Generate the narrative once for all videos
-    narrative = generate_narrative(prompt)
-    print("\nGenerated Narrative:\n")
-    print(narrative)
-
-    # Convert narrative to audio
-    audio_file = text_to_audio(narrative)
-    print(f"\nAudio file saved as {audio_file}")
-
     # Process each video file
-    for video_file in video_files:
+    for index, video_file in enumerate(video_files):
         video_path = os.path.join(directory_path, video_file)
-        output_path = os.path.join(directory_path, f"output_{video_file}")
+        output_path = os.path.join(directory_path, f"output_{index}_{video_file}")
+        
+        # Generate a unique narrative for each video using a different seed
+        seed = random.randint(0, 10000)
+        narrative = generate_narrative(prompt, seed)
+        print(f"\nGenerated Narrative for {video_file}:\n")
+        print(narrative)
+        
+        # Convert narrative to audio
+        audio_file = text_to_audio(narrative, f'narrative_{index}.mp3')
+        print(f"\nAudio file saved as {audio_file}")
         
         # Generate subtitles
         video_clip = VideoFileClip(video_path)

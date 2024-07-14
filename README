@@ -1,0 +1,3 @@
+to run requires a prompt and path to generate a series.
+run this to install nececary libraries
+"pip install transformers gtts moviepy"
